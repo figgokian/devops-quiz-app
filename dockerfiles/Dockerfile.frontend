@@ -1,0 +1,20 @@
+FROM node:26-alpine
+
+# Non-Root-User für Sicherheit erstellen
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+WORKDIR /app
+
+# 1. package.json spezifisch aus dem Frontend-Ordner kopieren
+COPY app/frontend/package*.json ./
+
+# 2. Abhängigkeiten zukunftssicher installieren
+RUN npm install --omit=dev
+
+# 3. Den restlichen Frontend-Code kopieren und dem appuser zuweisen
+COPY --chown=appuser:appgroup app/frontend/ .
+
+USER appuser
+
+EXPOSE 8080
+CMD ["node", "app.js"]

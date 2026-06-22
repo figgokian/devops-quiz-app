@@ -1,0 +1,20 @@
+FROM node:26-alpine
+
+# Non-Root-User für Sicherheit erstellen
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+WORKDIR /app
+
+# 1. package.json aus dem app/backend/ Ordner kopieren
+COPY app/backend/package*.json ./
+
+# 2. Abhängigkeiten zukunftssicher ohne Dev-Dependencies installieren
+RUN npm install --omit=dev
+
+# 3. Den restlichen Backend-Code kopieren und direkt dem appuser zuweisen
+COPY --chown=appuser:appgroup app/backend/ .
+
+USER appuser
+
+EXPOSE 3000
+CMD ["node", "app.js"]
